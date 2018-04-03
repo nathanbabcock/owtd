@@ -1,0 +1,162 @@
+-seamless transition between singleplayer and multiplayer experience; continuous scaling of playerbase size
+	-playable areas increase/decrease by available players
+-fake players: pseudo-turing-complete ai through limited game scope
+-incremental with data vis
+-persistent playermade structures, machines, etc
+	-everything is an input/output machine
+	-players output can become other players' input
+	-builds into a massive network
+	-players can log in at any time to see progress, collect output, whatever
+-chess/stratego type game
+-open world td
+-scaling network performance (like eve online)
+
+
+open world 2d rust
+casual arcade-y platform brawler
+-suuuper simple fast-paced mechanics
+br rpg
+- key: min-maxing stats by farming until endgame, balanced with PVP
+
+Open world TD
+- Core Features
+	- procedurally generated world
+	- specified sites where new players can start
+	- your base generates creeps
+	- can upgrade creeps to different types, levels, etc
+	- big emphasis on routing creeps
+		- switchable gates
+		- pressure plates, redstone-like circuits
+	- wave manipulation (building up big bursts to send at enemies/objectives)
+	- neutral monster spawns for gold
+	- neutral minibosses
+	- pre-built pathways
+		- editing lanes? (game design decision)
+	- boss spawns?
+	- more strongholds unlock as players go online
+		- do they also shrink later? or stay open based on historical peak
+- Added depth post-MVP
+	- really compelling notification integration
+		- mobile push, email, sms
+		- configurable emergency notifications
+		- daily/weekly digest/summary/customized newsletter
+		- stats and graphs and numbers
+	- action replay of important events while you were gone (?)
+	- global map (show player/origin point levels, color coded numbers)
+- Gameplay
+	- Strongholds
+		- Source of spawning creeps
+		- Leveled up with gold
+		- Level of stronghold -> level of creeps produced
+		- Level also -> stronghold HP
+		- Damaged by enemy creeps (health regen in mean time) -> neutral "contested state" (no regen) -> back to level 1
+		- Can be upgraded to spec into special types of creeps
+			- Combinations of several strongholds need to converge into a wave of creeps
+		- Give build permission over a (fixed?) radius
+		- When stronghold dies, all allied structures die (not creeps?)
+			- Cool explody animation and victory (or defeat) music
+	- Tower slots
+		- Pre-generated in world
+		- Towers level up??
+		- Specced with gold upgrades, just like strongholds
+	- Gold
+		- Gained (almost exclusively) by killing enemy creeps
+		- Global, not tied to any stronghold
+		- Lost if all strongholds are lost
+	- Lanes
+		- All lanes are pre-generated (??)
+		- All bidirectional
+		- No branching????
+		- Control structures (built? pregenerated?) operated by stronghold owner
+		- Enemy creeps also follow control structures?
+	- Creeps
+		- No collision with other creeps or towers, only strongholds and lane control structures
+	- Spawning (New Game)
+		- Need to spawn far enough for high level strongholds but close enough to interact
+- Brainstorming
+	- AoE buff shrines (destructible by creeps)
+	- Resource over time structures?
+		- Consume a tower slot
+	- Build up a garrison of reserve troops (completely fill a lane) blocked off by a gate. Pressure plate (activated by enemy units) opens the reserve gate
+		- Same strategy used to build large waves automatically and deploy them towards enemies
+	- Events (neutral creep invasions, minibosses, etc)
+	- Customization on a pixel-art level (within stronghold boundaries)
+		- A maxed out stronghold, zoomed out on the map, looks like a circle with cool designs in it
+	- Dev imposed acts of god to destroy rude pixel art 
+- Engine
+	- Discrete fixed tick-rate and positional grid
+		- Any creep speed variation?
+		- Client-side interpolation of position
+	- Host machine specs must be able to handle 100% grid saturation
+- Philosophy
+	- Randomness
+		- Enough RNG to force every stronghold to be designed according to the environment
+		- BUT still enough options to allow complex tactics and mechanisms (wave building, reserves, etc)
+	- Persistence
+	- Flux
+		- Will usually last overnight, but requires constant attention to remain stable (both due to neutral and enemy forces)
+- Questions
+	- what can creeps hit? other creeps? towers? specific power source?
+	- what gives gold? only killing other creeps (neutral/pvp)?
+	- what happens if two people are attacking the same objective? (miniboss/creep spawn)
+		- 'contest' state like a neutral control point in an fps?
+	- what limits creep mobility (why don't they go in a directoin forever)
+		- passive DoT
+		- DoT from hazards along the path
+		- no limit
+	- what do creeps do at unmarked intersections?
+		- random per creep
+		- random deterministic
+		- no such intersections
+		- player directed
+	- can you route/manipulate neutral creeps?
+	- what is the auxiliary dimension of the game?
+		- resource gathering? (mining, farming, etc. civ-style)
+		- aesthetics; customizing the area you control
+	- should towers level-up on their own? be manually upgraded? both?
+	- creeps buffing/supporting other creeps? (healers, tanks, etc)
+		- Maybe avoid since everything should be automated, and is practically just a numbers game
+		- Tactics should be more about routing then wave composition (?????)
+	- spawning in waves or continuous?
+		- I really like the idea of manual wave creation/manipulation
+	- how to enemies interact with friendly lane control structures? (gates, barricades)
+		- ignore completely, no collision
+		- damage + destroy
+	- if lane control structures must be build, where can they be built?
+	- where can towers be built? is there a no-mans-land between player strongholds?
+		- dynamic lane interactions within nomans land? buff gates and stuff?
+	- same slots for towers and spawners?
+		- Forces a choice between offense + defense (unless there is creep-v-creep combat)
+	- should stronghold radius increase by level??
+		- Probably not, complicates things like Civ city-growth where radii intersect
+			- Solve by enforcing a max radius...
+	- Need ability to clear a clogged lane/ delete all creeps in lane?
+	- XP/level unlocks upgrades, which must be bought?
+		- both xp and gp gate upgrades, or just gp?
+		- only GP gates upgrades, and XP gates level
+	- What prevents snowball? what protects noobs?
+	- Any kind of cooperative interaction?
+		- In a way, all conflict benefits both parties since it is the primary source of gold in the game
+		- Stable configurations of creep-farming could be super-beneficial
+		- In fact, destroying an enemy in such a configuration may result in *less* income overall
+		- buuuut taking strongholds = growth (potentially exponential vs linear)
+	- How to ensure power levels don't shift too drastically overnight
+		- If a big wave is building up, you see it happening
+		- You have to log in to spend
+		- Strongholds resetting to level 1 protects defenders from offense snowball
+		- What protects offense from defensive snowball? (stronghold defeated, reset to level 1, immediately smashed by the lvl 30 creeps from next door)
+		- Some mechanic needs to enforce a cooldown period of almost ~24hrs before consecutive strongholds can fall???????
+	- What's the point of a stronghold landlocked by all friendly strongholds?
+		- Creeps can't even get out to enemy bases...
+		- Solve this with factory/resource mining structures?
+			- Build an empire with evolving military on the outsides and evolving economy on the inside
+			- If this route is taken, should military or economy be the main generator of cash?
+			- XP generated by military (towers killing creeeps), GP generated by economy (passive/vulernable resource structures), growth generated by military (offensive creeps)
+- Post-MVP/blue sky
+	- scalability/sharding?
+	- monetization
+		-freemium
+		-microtransactions
+			-creep skins, tower skins, banners
+		-buy once? (doesn't seem to fit)
+	- Name?
