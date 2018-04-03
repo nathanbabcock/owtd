@@ -8,6 +8,12 @@ const config = {
     bases:50,
     max_lane_dist: 20,
     max_neighbors: 3,
+    procgen: {
+        lane_dist_mean: 15,
+        lane_dist_dev: 10,
+        lane_turn_mean: 5,
+        lane_turn_dev: 5
+    },
 	ascii: {
 		empty: ' ',
 		tower: 'T',
@@ -58,6 +64,47 @@ function genMap(){
     };
     map[base.x][base.y] = config.ascii.base;
     bases.push(base);
+
+    let cur = {x: base.x, y: base.y},
+        cur_lane_length = 0,
+        cur_dir = chance.character({pool: "nsew"});
+    while(bases.length < config.bases){
+        // Turn
+        if(chance.bool({likelihood: 100 / config.procgen.lane_turn_mean}))
+            cur_dir = chance.character({pool: "nsew"});
+
+        // Step
+        switch(cur_dir){
+            case 'n':
+                cur.y++;
+                break;
+            case 's':
+                cur.y--;
+                break;
+            case 'e':
+                cur.x++;
+                break;
+            case 'w':
+                cur.x--;
+                break;
+            default:
+                console.error('wat');
+        }
+
+        // Edge
+        if(cur.x <= 0 || cur.y <= 0 || cur.x >= config.width || cur.y >= config.height) continue;
+
+        // Base
+        if(chance.bool({likelihood: 100 / config.procgen.lane_dist_mean})){
+            map[cur.x][cur.y] = config.ascii.base;
+            bases.push({
+                x: cur.x,
+                y: cur.y,
+                id:bases.length
+            });
+        } else
+            map[cur.x][cur.y] = config.ascii.lane;
+    }
 }
 
 function mapToString(){
@@ -69,9 +116,6 @@ function mapToString(){
 	}
 	return output;
 }
-
-
-
 
 //// RUN
 genMap();

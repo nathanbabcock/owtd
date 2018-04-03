@@ -160,3 +160,29 @@ Open world TD
 			-creep skins, tower skins, banners
 		-buy once? (doesn't seem to fit)
 	- Name?
+
+4/3
+
+2 hrs dev (procgen)
+
+procgen algo:
+- init: randomly place an origin base
+- repeat: randomly select a base to branch from
+- random walk (with probabilistic turns + length) to next base
+	- do not collide with other lanes, towers, bases, edges (if you do, discard entire lane and start over)
+	- check that base is not within radius of other bases (check all for euclidian distance)
+	- once lane is validated, add random towers adjacent to lane (within radius of each tower)
+- stop when target towers achieved (or after a certain failure rate?)
+
+longer term roadmap:
+- procgen a map with bases, lanes, towers
+- render to canvas with pan+zoom
+- creep spawn and movement
+- towershots
+- base damage
+- tower, creep, base UI
+- levelling
+...
+- network code
+
+fuck man i dont know what to do
