@@ -186,3 +186,6 @@ longer term roadmap:
 - network code
 
 fuck man i dont know what to do
+
+4/4
+2 hrs procgen
