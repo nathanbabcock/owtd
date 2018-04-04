@@ -5,7 +5,7 @@ const chance = new require('chance')();
 const config = {
 	width:100,
 	height:100,
-    bases:75,
+    bases:1000,
     base_radius:5,
     max_lane_dist: 20,
     max_neighbors: 3,
@@ -13,7 +13,9 @@ const config = {
         lane_dist_mean: 15,
         lane_dist_dev: 0,
         lane_turn_mean: 5,
-        lane_turn_dev: 5
+        lane_turn_dev: 5,
+        towers_per_lane_mean: 8,
+        towers_per_lane_dev: 2,
     },
 	ascii: {
 		empty: ' ',
@@ -36,11 +38,19 @@ function distance(a, b){
     return Math.sqrt(Math.pow(a.x-b.x, 2)+Math.pow(a.y-b.y, 2));
 }
 
-
 function samePos(a, b){
     return a.x === b.x && a.y === b.y;
 }
     
+function getAdjacent(a){
+    return [
+        {x: a.x+1, y:a.y},
+        {x: a.x-1, y:a.y},
+        {x: a.x, y:a.y+1},
+        {x: a.x, y:a.y-1},
+    ];
+}
+
 //// METHODS
 function initMap(){
     console.log("Initializing empty map");
@@ -72,6 +82,7 @@ function genMap(){
     while(bases.length < config.bases){
         if(addBase()) success++;
         else fail++;
+        if(fail >= config.width * config.height * 2) break; // Maxed out available area
     }
 
     console.log(`Generated ${bases.length} bases (${fail} retries)`);
@@ -81,7 +92,7 @@ function addBase(){
     let origin = chance.pickone(bases),
         cur = {x: origin.x, y: origin.y},
         cur_dir = chance.character({pool: "nsew"}),
-        decided_length = Math.floor(chance.normal({mean:15, dev:3})),
+        decided_length = Math.floor(chance.normal({mean:config.procgen.lane_dist_mean, dev:config.procgen.lane_dist_dev})),
         lane = [];
 
     // console.log(decided_length);
@@ -112,7 +123,7 @@ function addBase(){
         }
 
         // Edge
-        if(cur.x <= 0 || cur.y <= 0 || cur.x >= config.width || cur.y >= config.height) return false;
+        if(cur.x < 0 || cur.y < 0 || cur.x >= config.width || cur.y >= config.height) return false;
 
         // Self
         for(let i = 0; i < lane.length; i++)
@@ -143,6 +154,43 @@ function addBase(){
     origin.neighbors.push(base.id);
     bases.push(base);
     map[base.x][base.y] = config.ascii.base;
+
+    // Plant towers?
+    let potential_towers = [];
+    for(let i = 0; i < lane.length - 1; i++){
+        let tile = lane[i];
+        //if(distance(tile, origin) > config.base_radius) break;
+        let adjacent = getAdjacent(tile)
+                .filter(adj => adj.x >= 0 && adj.y >= 0 && adj.x < config.width && adj.y < config.height)
+                .filter(adj => map[adj.x][adj.y] === config.ascii.empty)
+                .filter(adj => !potential_towers.includes(adj));
+        // } catch (e) {
+        //     console.error(`Error occurred while checking for towerslot at x=${tile.x}, y=${tile.y}`);
+        //     console.error(e.stack);
+        // }
+        Array.prototype.push.apply(potential_towers, adjacent);
+        // console.log(`${potential_towers.length} potetinal towers`);
+    }
+
+    if(potential_towers.length > 0)
+        chance.pickset(potential_towers, chance.normal({mean:config.procgen.towers_per_lane_mean, dev:config.procgen.towers_per_lane_dev}))
+            .forEach(towerslot => {
+                let owner = null;
+                if(distance(towerslot, origin) <= config.base_radius)
+                    owner = origin;
+                else if (distance(towerslot, base) <= config.base_radius)
+                    owner = base;
+                else
+                    return;
+
+                let tower = {
+                    x: towerslot.x,
+                    y: towerslot.y,
+                    id: towers.length,
+                };
+                towers.push(tower);
+                map[tower.x][tower.y] = config.ascii.tower;
+            });
 
     return base;
 }
