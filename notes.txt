@@ -210,3 +210,52 @@ update (one game tick)
 - bases spawn creeps on every lane (given cooldown)
 - creeps move along lane
 - creeps hit and dmg other base
+
+Game > Map > bases + towers + lanes > tiles
+
+2hrs wasted being braindead about oo hierarchies
+just hack the thing together
+everything static in a global array with an id (array index)
+all connections by passing around the ids
+
+classes (e.g. Creep) vs plain objects
+- it's not like I am actually enforcing any kind of interface, this isn't typescript
+- when I'm passing an options object in the cunstructor it's virtually the same thing anyways...
+- maybe it's sliiiightly better than not (manage construction logic in a real constructor)
+- getters and setters? chained methods?
+
+static things: downloaded once from server (can even be served via http?)
+- lanes
+- bases
+- towers
+- etc
+
+dynamic things: constantly changing
+- tower attack CD
+- creep health
+- base health
+- base state/ownership
+- creep position
+- towerslot empty or filled
+
+use an event system!
+- event: [CREEP_SPAWNED]
+- event: [TOWER_BUILT]
+- event: [TOWER_UPGRADED]
+
+in fact, 95% of everything is deterministic. the client knows when creeps should spawn as long as it stays in sync with the server
+
+the idea is to use the same event model to drive both networking and presentation
+
+this is an optimization, right?
+the real tricky bit is that the renderer needs to interpolate between game updates, without replicating too much game logic
+maybe there are simpler solutions to this problem
+possible solutions:
+- lock renderer to same game update rate
+- renderer lags behind game update by 1 tick
+- renderer predicts next update and interpolates (???)
+
+how do you do creep movement?
+how do you do tower attacks?
+
+keyword: Deterministic Lockstep
