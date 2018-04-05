@@ -190,3 +190,23 @@ fuck man i dont know what to do
 4/4
 ~1.5 hr procgen
 1hr refactoring for browser (@ home)
+
+4/5
+creep knows:
+-what lane they're on (lane id int)
+-which lane tile id they're on (array index int)
+-what tile they're on (position x and y) ...implied by above
+-what base they belong to (implied by lane?)
+-what direction they're going (forward or backwards according to lane tile list) (implied by above?)
+
+lane knows:
+-what base they start from
+-what base they go to
+
+base knows:
+-what lanes they have
+
+update (one game tick)
+- bases spawn creeps on every lane (given cooldown)
+- creeps move along lane
+- creeps hit and dmg other base

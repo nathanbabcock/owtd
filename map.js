@@ -1,7 +1,10 @@
 
 //// REQUIRE
-const _chance = require('chance'),
-    chance = new _chance();
+const
+    _chance = require('chance'), chance = new _chance(),
+    Base = require('./base.js'),
+    Lane = require('./lane.js'),
+    Creep = require('./creep.js');
 
 module.exports = class Map {
     constructor(options = {}){
@@ -32,20 +35,20 @@ module.exports = class Map {
                 lane:  '+',
                 creep: 'o'
             },
+            spawn_time_base: 5,
         }
     }
     
     //// UTIL
-    // TODO move me to util.js
-    distance(a, b){
+    static distance(a, b){
         return Math.sqrt(Math.pow(a.x-b.x, 2)+Math.pow(a.y-b.y, 2));
     }
 
-    samePos(a, b){
+    static samePos(a, b){
         return a.x === b.x && a.y === b.y;
     }
 
-    getAdjacent(a){
+    static getAdjacent(a){
         return [
             {x: a.x+1, y:a.y},
             {x: a.x-1, y:a.y},
@@ -54,6 +57,8 @@ module.exports = class Map {
         ];
     }
 
+
+    //// Methods
     init(){
         console.log("Initializing empty map");
         this.map = [];
@@ -69,12 +74,11 @@ module.exports = class Map {
         this.init();
 
         // Place one random base
-        let base = {
+        let base = new Base({
             x: chance.integer({min: 0, max:this.config.width - 1}),
             y: chance.integer({min: 0, max:this.config.height - 1}),
-            id: 0,
-            neighbors: [],
-        };
+            id: this.bases.length,
+        });
         this.map[base.x][base.y] = this.config.ascii.base;
         this.bases.push(base);
         
@@ -128,7 +132,7 @@ module.exports = class Map {
     
             // Self
             for(let i = 0; i < lane.length; i++)
-                if(this.samePos(lane[i], cur)) return false;
+                if(Map.samePos(lane[i], cur)) return false;
             
             // this.map
             if(this.map[cur.x][cur.y] !== this.config.ascii.empty) return false;
@@ -140,28 +144,37 @@ module.exports = class Map {
         
         // Base proximity
         for(let i = 0; i < this.bases.length; i++)
-            if(this.distance(cur, this.bases[i]) < this.config.base_radius * 2) return false;
+            if(Map.distance(cur, this.bases[i]) < this.config.base_radius * 2) return false;
     
         // Plant lane
+        let laneObj = new Lane({id: this.lanes.length});
+        laneObj.tiles = lane;
+        this.lanes.push(laneObj);
         lane.forEach(tile => this.map[tile.x][tile.y] = this.config.ascii.lane);
     
         // Plant base
-        let base = {
+        let base = new Base({
             x: cur.x,
             y: cur.y,
             id: this.bases.length,
-            neighbors: [origin.id]
-        };
+        });
+        base.neighbors.push(origin.id);
         origin.neighbors.push(base.id);
         this.bases.push(base);
         this.map[base.x][base.y] = this.config.ascii.base;
+
+        // Lane attachment
+        origin.lanes.push(laneObj.id);
+        base.lanes.push(laneObj.id);
+        laneObj.from = origin.id;
+        laneObj.to = base.id;
     
         // Plant towers?
         let potential_towers = [];
         for(let i = 0; i < lane.length - 1; i++){
             let tile = lane[i];
             //if(distance(tile, origin) > this.config.base_radius) break;
-            let adjacent = this.getAdjacent(tile)
+            let adjacent = Map.getAdjacent(tile)
                     .filter(adj => adj.x >= 0 && adj.y >= 0 && adj.x < this.config.width && adj.y < this.config.height)
                     .filter(adj => this.map[adj.x][adj.y] === this.config.ascii.empty)
                     .filter(adj => !potential_towers.includes(adj));
@@ -177,9 +190,9 @@ module.exports = class Map {
             chance.pickset(potential_towers, chance.normal({mean:this.config.procgen.towers_per_lane_mean, dev:this.config.procgen.towers_per_lane_dev}))
                 .forEach(towerslot => {
                     let owner = null;
-                    if(this.distance(towerslot, origin) <= this.config.base_radius)
+                    if(Map.distance(towerslot, origin) <= this.config.base_radius)
                         owner = origin;
-                    else if (this.distance(towerslot, base) <= this.config.base_radius)
+                    else if (Map.distance(towerslot, base) <= this.config.base_radius)
                         owner = base;
                     else
                         return;
@@ -205,6 +218,45 @@ module.exports = class Map {
         }
         return output;
     }
+
+    //// Game engine
+    update(){
+        //this.towers.forEach(this.updateTower);
+        this.bases.forEach(this.updateBase, this);
+        this.creeps.forEach(this.updateCreep, this);
+    }
+
+    updateBase(base){
+        // console.log(`Updating base ${base.spawn_time}`);
+        base.spawn_time--;
+        if(base.spawn_time <= 0){
+            base.lanes.forEach(laneId => {
+                let lane = this.lanes[laneId];
+                let creep = new Creep({
+                    base: base.id,
+                    lane:lane.id,
+                    id: this.creeps.length,
+                    direction: base.id === lane.from ? -1 : 1,
+                    lane_index: base.id === lane.from ? 0 : lane.tiles.length - 1,
+                });
+                this.creeps.push(creep);
+                // console.log(`Spawning a creep at x=${this.lanes[creep.lane].tiles[creep.lane_index].x}`);
+            });
+            base.spawn_time = this.config.spawn_time_base;
+            return;
+        }
+    }
+
+    updateCreep(creep){
+        // Move
+        creep.lane_index += creep.direction;
+        if((creep.direction === -1 && creep.lane_index >= this.lanes[creep.lane].tiles.length)
+            || (creep.direction === 1 && creep.lane_index < 0)){
+            console.log(`Creep hit base`);
+            this.creeps.splice(this.creeps.indexOf(creep), 1);
+        } 
+    }
+
 }
 //// RUN
 // genthis.map();
