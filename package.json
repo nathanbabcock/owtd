@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chance": ""
+    "chance": "1.0.13",
+    "pixi.js": "4.7.3"
   }
 }
