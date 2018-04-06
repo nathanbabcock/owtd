@@ -212,8 +212,11 @@ module.exports = class Map {
     toString(){
         let output = "";
         for(let x = 0; x < this.config.width; x++){
-            for(let y = 0; y < this.config.height; y++)
-                output += this.map[x][y]
+            for(let y = 0; y < this.config.height; y++){
+                // let creepFound = false;
+                // output += creepFound ? this.config.ascii.creep : this.map[x][y];
+                output += this.map[x][y];
+            }
             output += '\n';
         }
         return output;
@@ -223,7 +226,7 @@ module.exports = class Map {
     update(){
         //this.towers.forEach(this.updateTower);
         this.bases.forEach(this.updateBase, this);
-        this.creeps.forEach(this.updateCreep, this);
+        // this.creeps.forEach(this.updateCreep, this);
     }
 
     updateBase(base){
@@ -240,11 +243,20 @@ module.exports = class Map {
                     lane_index: base.id === lane.from ? 0 : lane.tiles.length - 1,
                 });
                 this.creeps.push(creep);
-                // console.log(`Spawning a creep at x=${this.lanes[creep.lane].tiles[creep.lane_index].x}`);
+                //console.log(`Spawning a creep at x=${this.lanes[creep.lane].tiles[creep.lane_index].x}`);
             });
             base.spawn_time = this.config.spawn_time_base;
             return;
         }
+    }
+
+    getCreepTile(creep){
+       return this.lanes[creep.lane].tiles[creep.lane_index];
+    }
+
+    getCreepNextTile(creep){
+        // TODO handle end
+        return this.lanes[creep.lane].tiles[creep.lane_index + creep.direction];
     }
 
     updateCreep(creep){

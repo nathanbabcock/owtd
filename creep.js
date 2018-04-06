@@ -5,5 +5,7 @@ module.exports = class Creep {
         this.lane = options.lane;
         this.lane_index = options.lane_index;
         this.direction = options.direction;
+        this.x = options.x;
+        this.y = options.y;
     }
 }

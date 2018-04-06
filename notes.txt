@@ -259,3 +259,6 @@ how do you do creep movement?
 how do you do tower attacks?
 
 keyword: Deterministic Lockstep
+see also: Snapshot interpolation
+
+4/6 0.5hr refactor/supporting code for creep movement

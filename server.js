@@ -3,7 +3,7 @@ const
 
 let map = new Map();
 map.gen();
-console.log(map.toString());
+// console.log(map.toString());
 
-for(let i = 0; i < 20; i++)
-    map.update();
+map.update();
+console.log(map.toString());
