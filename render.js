@@ -34,11 +34,35 @@ map.bases.forEach(base => {
     graphics.drawCircle(base.x * renderConfig.grid_size, base.y * renderConfig.grid_size, renderConfig.base_radius);
 });
 
-graphics.beginFill(0x0000FF);
+
+// Towers
+
 // graphics.lineStyle(4, 0xffd900, 1);
 map.towers.forEach(tower => {
+    graphics.beginFill(0x0000FF);
     graphics.drawCircle(tower.x * renderConfig.grid_size, tower.y * renderConfig.grid_size, renderConfig.tower_radius);
+    graphics.endFill();
 });
+
+
+
+// Lanes
+graphics.lineStyle(4, 0x000000);
+ map.lanes.forEach(lane => {
+    graphics.moveTo(lane.from.x * renderConfig.grid_size, lane.from.y * renderConfig.grid_size);
+    graphics.lineTo(lane.tiles[0].x * renderConfig.grid_size, lane.tiles[0].y * renderConfig.grid_size);
+    for(let i = 0; i < lane.tiles.length - 1; i++){
+        graphics.moveTo(lane.tiles[i].x  * renderConfig.grid_size, lane.tiles[i].y * renderConfig.grid_size);
+        graphics.lineTo(lane.tiles[i+1].x * renderConfig.grid_size, lane.tiles[i+1].y * renderConfig.grid_size);
+    }
+    // graphics.moveTo(lane.tiles[lane.tiles.length - 1].x  * renderConfig.grid_size, lane.tiles[lane.tiles.length - 1].y * renderConfig.grid_size);
+    graphics.lineTo(lane.to.x  * renderConfig.grid_size, lane.to.y * renderConfig.grid_size);
+});
+
+// myGraph.lineStyle(thickness, 0x000000)
+//     .moveTo(0, 0)    
+//     .lineTo(endPoint.x, endPoint.y);
+
 
 // 
 
