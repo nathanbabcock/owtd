@@ -6,7 +6,10 @@ const
 let map = new Map();
 console.log(map.config.width, map.config.height, map.config.bases);
 map.gen();
+// map.update();
 console.log(map.toString());
+
+let gameLoop = setInterval(map.update.bind(map), 1000);
 
 let app = new PIXI.Application({
     antialias: true,
@@ -25,6 +28,7 @@ let renderConfig = {
     grid_size: 25,
     base_radius: 25,
     tower_radius: 15,
+    creep_radius: 10,
 };
 
 // Bases
@@ -55,11 +59,10 @@ graphics.lineStyle(4, 0x000000);
     graphics.lineTo(lane.to.x  * renderConfig.grid_size, lane.to.y * renderConfig.grid_size);
 });
 
-
-requestAnimationFrame(update);
- 
-function update() {
-    console.log("update()");
- 
-    app.render(app.stage);
-}
+// Creeps
+map.creeps.forEach(creep => {
+    graphics.beginFill(0xFF00FF);
+    let tile = map.getCreepTile(creep);
+    graphics.drawCircle(tile.x * renderConfig.grid_size, tile.y * renderConfig.grid_size, renderConfig.creep_radius);
+    graphics.endFill();
+});

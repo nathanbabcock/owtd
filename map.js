@@ -224,6 +224,8 @@ module.exports = class Map {
 
     //// Game engine
     update(){
+        console.log("Map.update()");
+        console.log(this);
         //this.towers.forEach(this.updateTower);
         this.bases.forEach(this.updateBase, this);
         // this.creeps.forEach(this.updateCreep, this);
