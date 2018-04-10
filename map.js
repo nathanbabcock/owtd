@@ -13,6 +13,7 @@ module.exports = class Map {
         this.towers = [];
         this.lanes = [];
         this.creeps = [];
+        this.last_update = Date.now();
         this.config = {
             width:options.width || 100,
             height:options.height || 100,
@@ -36,6 +37,7 @@ module.exports = class Map {
                 creep: 'o'
             },
             spawn_time_base: 5,
+            tick_rate: 1000,
         }
     }
     
@@ -224,10 +226,12 @@ module.exports = class Map {
 
     //// Game engine
     update(){
-        console.log("Map.update()");
+        // console.log("Map.update()");
         //this.towers.forEach(this.updateTower);
         this.bases.forEach(this.updateBase, this);
         this.creeps.forEach(this.updateCreep, this);
+
+        this.last_update = Date.now();
         // console.log(this.getCreepTile(this.creeps[0]).x);
     }
 
@@ -253,7 +257,6 @@ module.exports = class Map {
     }
 
     getCreepTile(creep){
-        console.log("Creep lane index = ",creep.lane_index);
        return this.lanes[creep.lane].tiles[creep.lane_index];
     }
 
@@ -266,7 +269,6 @@ module.exports = class Map {
         // console.log("UPDATE CREEP");
         // Move
         creep.lane_index += creep.direction;
-        console.log("creep.direction", creep.direction);
         // if((creep.direction === -1 && creep.lane_index >= this.lanes[creep.lane].tiles.length)
         //     || (creep.direction === 1 && creep.lane_index < 0)){
         //     console.log(`Creep hit base`);

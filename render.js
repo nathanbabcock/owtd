@@ -70,20 +70,39 @@ creepGraphics.endFill();
 function renderCreeps(){
     // Creeps
     map.creeps.forEach(creep => {
-        if(!creep.sprite)
+        // Spawn sprite for the first time
+        if(!creep.sprite){
             creep.sprite = new PIXI.Sprite(creepGraphics.generateCanvasTexture());
-        let tile = map.getCreepTile(creep);
-        creep.sprite.x = tile.x * renderConfig.grid_size;
-        creep.sprite.y = tile.y * renderConfig.grid_size;
-        creep.sprite.anchor.x = creep.sprite.anchor.y = 0.5;
-        app.stage.addChild(creep.sprite);
+            creep.sprite.anchor.x = creep.sprite.anchor.y = 0.5;
+            app.stage.addChild(creep.sprite);
+        }
+
+
+        try {
+            // Interpolate movement between grid squares
+            let delta_time = Date.now() - map.last_update,
+                tick_ratio = delta_time / map.config.tick_rate,
+                tile = map.getCreepTile(creep),
+                next_tile = map.getCreepNextTile(creep),
+                delta_x = next_tile.x - tile.x,
+                delta_y = next_tile.y - tile.y;
+
+                // console.log("delta_time", delta_time);
+                // console.log("TICK RATIO", tick_ratio);
+
+            // Move sprite
+            creep.sprite.x = (tile.x + delta_x * tick_ratio) * renderConfig.grid_size;
+            creep.sprite.y = (tile.y + delta_y * tick_ratio) * renderConfig.grid_size;
+        } catch (e) {
+            app.stage.removeChild(creep.sprite);
+        }
     });
 }
 
 
 
 app.ticker.add(function() {
-    console.log("PIXI update");
+    // console.log("PIXI update");
     renderCreeps();
     app.renderer.render(app.stage);
 });
