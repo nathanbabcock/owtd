@@ -70,13 +70,19 @@ creepGraphics.endFill();
 function renderCreeps(){
     // Creeps
     map.creeps.forEach(creep => {
+        // Handle deads
+        // TODO death anim here?
+        if(creep.dead && creep.sprite)
+            creep.sprite.visible = false;
+        else if(!creep.dead && creep.sprite && !creep.sprite.visible)
+            creep.sprite.visible = true;
+
         // Spawn sprite for the first time
         if(!creep.sprite){
             creep.sprite = new PIXI.Sprite(creepGraphics.generateCanvasTexture());
             creep.sprite.anchor.x = creep.sprite.anchor.y = 0.5;
             app.stage.addChild(creep.sprite);
         }
-
 
         try {
             // Interpolate movement between grid squares
@@ -94,7 +100,8 @@ function renderCreeps(){
             creep.sprite.x = (tile.x + delta_x * tick_ratio) * renderConfig.grid_size;
             creep.sprite.y = (tile.y + delta_y * tick_ratio) * renderConfig.grid_size;
         } catch (e) {
-            app.stage.removeChild(creep.sprite);
+            // TODO what to do here
+            //app.stage.removeChild(creep.sprite);
         }
     });
 }

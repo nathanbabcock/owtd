@@ -281,3 +281,4 @@ Either Browserify + Grunt + manually export to window
 conditional require <-- let's do this.
 
 1hr refactor away from Browserify (native nodejs/browser interop)
+0.5hr tower attack

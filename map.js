@@ -7,7 +7,7 @@
     }
 
     class Creep {
-        constructor(options){
+        constructor(options = {}){
             this.id = options.id;
             this.base = options.base;
             this.lane = options.lane;
@@ -287,22 +287,31 @@
             // console.log(`Updating base ${base.spawn_time}`);
             base.spawn_time--;
             if(base.spawn_time <= 0){
-                base.lanes.forEach(laneId => {
-                    let lane = this.lanes[laneId];
-                    let creep = new Creep({
-                        base: base.id,
-                        lane:lane.id,
-                        id: this.creeps.length,
-                        direction: base.id === lane.from ? 1 : -1,
-                        lane_index: base.id === lane.from ? 0 : lane.tiles.length - 1,
-                        health: this.config.creep_base_health,
-                    });
-                    this.creeps.push(creep);
-                    //console.log(`Spawning a creep at x=${this.lanes[creep.lane].tiles[creep.lane_index].x}`);
-                });
+                base.lanes.forEach(laneId => this.spawnCreep(base, this.lanes[laneId]));
                 base.spawn_time = this.config.spawn_time_base;
                 return;
             }
+        }
+
+        // Utilize object pooling for creep spawning
+        spawnCreep(base, lane){
+            let creep = null;
+            for(let i = 0; i < this.creeps.length; i++){
+                if(this.creeps[i].dead){
+                    creep = this.creeps[i];
+                    break;
+                }
+            }
+            if(!creep){
+                creep = new Creep({id: this.creeps.length});
+                this.creeps.push(creep);
+            }
+            creep.base = base.id;
+            creep.lane = lane.id;
+            creep.direction = base.id === lane.from? 1 : -1;
+            creep.lane_index = base.id === lane.from? 0 : lane.tiles.length - 1;
+            creep.health = this.config.creep_base_health;
+            creep.dead = false;
         }
 
         getCreepTile(creep){
@@ -315,11 +324,13 @@
         }
 
         updateCreep(creep){
+            if(creep.dead) return;
+
             // Move
             creep.lane_index += creep.direction;
             if(creep.lane_index < 0 || creep.lane_index >= this.lanes[creep.lane].tiles.length){
                 console.log(`Creep out of bounds`);
-                this.creeps.splice(this.creeps.indexOf(creep), 1);
+                creep.dead = true;
             }
         }
 
@@ -335,6 +346,7 @@
             if(tower.target){
                 let creep = this.getCreep(tower.target);
                 if(!creep) tower.target = null;
+                if(creep.dead) tower.target = null;
                 else if(Map.distance(creep, tower) > tower.attack_radius) tower.target = null;
             }
 
@@ -343,6 +355,7 @@
                 let target = null,
                     target_dist = Infinity;
                 this.creeps.forEach(creep => {
+                    if(creep.dead) return;
                     let dist = Map.distance(this.getCreepTile(creep), tower);
                     // console.log(creep, tower);
                     // console.log(dist, tower.attack_radius)
@@ -360,7 +373,7 @@
                 creep.health--;
                 if(creep.health <= 0){
                     // console.log("Creep died to tower");
-                    this.creeps.splice(this.creeps.indexOf(creep), 1);
+                    creep.dead = true;
                     tower.target = null;
                 }
             }
