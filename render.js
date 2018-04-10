@@ -59,6 +59,7 @@ graphics.lineStyle(4, 0x000000);
     graphics.lineTo(lane.to.x  * renderConfig.grid_size, lane.to.y * renderConfig.grid_size);
 });
 
+<<<<<<< HEAD
 // Creeps
 map.creeps.forEach(creep => {
     graphics.beginFill(0xFF00FF);
@@ -67,3 +68,52 @@ map.creeps.forEach(creep => {
     graphics.drawCircle(tile.x * renderConfig.grid_size, tile.y * renderConfig.grid_size, renderConfig.creep_radius);
     graphics.endFill();
 });
+=======
+
+// Preload creep graphics
+var creepGraphics = new PIXI.Graphics();
+creepGraphics.beginFill(0xFF00FF);
+creepGraphics.drawCircle(0, 0, renderConfig.creep_radius);
+creepGraphics.endFill();
+
+
+function renderCreeps(){
+    // Creeps
+    map.creeps.forEach(creep => {
+        // Spawn sprite for the first time
+        if(!creep.sprite){
+            creep.sprite = new PIXI.Sprite(creepGraphics.generateCanvasTexture());
+            creep.sprite.anchor.x = creep.sprite.anchor.y = 0.5;
+            app.stage.addChild(creep.sprite);
+        }
+
+
+        try {
+            // Interpolate movement between grid squares
+            let delta_time = Date.now() - map.last_update,
+                tick_ratio = delta_time / map.config.tick_rate,
+                tile = map.getCreepTile(creep),
+                next_tile = map.getCreepNextTile(creep),
+                delta_x = next_tile.x - tile.x,
+                delta_y = next_tile.y - tile.y;
+
+                // console.log("delta_time", delta_time);
+                // console.log("TICK RATIO", tick_ratio);
+
+            // Move sprite
+            creep.sprite.x = (tile.x + delta_x * tick_ratio) * renderConfig.grid_size;
+            creep.sprite.y = (tile.y + delta_y * tick_ratio) * renderConfig.grid_size;
+        } catch (e) {
+            app.stage.removeChild(creep.sprite);
+        }
+    });
+}
+
+
+
+app.ticker.add(function() {
+    // console.log("PIXI update");
+    renderCreeps();
+    app.renderer.render(app.stage);
+});
+>>>>>>> 6a378542b71291ec292c11d92b52a78913ecb096
