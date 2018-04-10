@@ -274,3 +274,10 @@ PIXI.js for rendering
 Lance.gg for networking
 
 1hr proper PIXI integration at home
+
+4/10:
+Either Browserify + Grunt + manually export to window
+-OR-
+conditional require <-- let's do this.
+
+1hr refactor away from Browserify (native nodejs/browser interop)

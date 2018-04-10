@@ -1,13 +1,13 @@
 //// Require
-const
-    Map = require('./map.js'),
-    Pixi = require('pixi.js');
+// const
+//     Map = require('./map.js'),
+//     Pixi = require('pixi.js');
 
 let map = new Map();
-console.log(map.config.width, map.config.height, map.config.bases);
+console.log(chance.string());
 map.gen();
 // map.update();
-console.log(map.toString());
+// console.log(map.toString());
 
 let gameLoop = setInterval(map.update.bind(map), 1000);
 
@@ -19,7 +19,7 @@ let app = new PIXI.Application({
     height:window.innerHeight - 25,
 });
 window.addEventListener('resize', () => app.renderer.resize(window.innerWidth - 25, window.innerHeight - 25));
-document.body.appendChild(app.view);
+// document.body.appendChild(app.view);
 
 var graphics = new PIXI.Graphics();
 app.stage.addChild(graphics);
@@ -59,16 +59,6 @@ graphics.lineStyle(4, 0x000000);
     graphics.lineTo(lane.to.x  * renderConfig.grid_size, lane.to.y * renderConfig.grid_size);
 });
 
-<<<<<<< HEAD
-// Creeps
-map.creeps.forEach(creep => {
-    graphics.beginFill(0xFF00FF);
-    let tile = map.getCreepTile(creep);
-    let nextTile = map.getCreepNextTile(creep);
-    graphics.drawCircle(tile.x * renderConfig.grid_size, tile.y * renderConfig.grid_size, renderConfig.creep_radius);
-    graphics.endFill();
-});
-=======
 
 // Preload creep graphics
 var creepGraphics = new PIXI.Graphics();
@@ -109,11 +99,8 @@ function renderCreeps(){
     });
 }
 
-
-
 app.ticker.add(function() {
     // console.log("PIXI update");
     renderCreeps();
     app.renderer.render(app.stage);
 });
->>>>>>> 6a378542b71291ec292c11d92b52a78913ecb096
