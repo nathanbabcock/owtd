@@ -4,8 +4,8 @@
 //     Pixi = require('pixi.js');
 
 let map = new Map();
-console.log(chance.string());
 map.gen();
+chance.pickone(map.bases).owner = "excalo";
 // map.update();
 // console.log(map.toString());
 

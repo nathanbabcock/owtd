@@ -33,6 +33,7 @@
             this.x = options.x;
             this.y = options.y;
             this.id = options.id;
+            this.health = options.health;
             this.owner = options.owner;
             this.neighbors = [];
             this.lanes = [];
@@ -48,12 +49,13 @@
             this.lanes = [];
             this.creeps = [];
             this.last_update = Date.now();
-            this.owner = "excalo",
+            this.player = "excalo",
             this.config = {
                 width:options.width || 100,
                 height:options.height || 100,
                 bases:options.bases || 1000,
-                base_radius:5,
+                base_radius: 5,
+                base_health: 5,
                 max_lane_dist: 20,
                 max_neighbors: 3,
                 procgen: {
@@ -77,6 +79,7 @@
                 tower_attack_cooldown: 1,
                 tower_base_attack_radius: 5,
                 tower_base_damage: 1,
+                server_player: "server",
             }
         }
         
@@ -118,8 +121,9 @@
             let base = new Base({
                 x: chance.integer({min: 0, max:this.config.width - 1}),
                 y: chance.integer({min: 0, max:this.config.height - 1}),
+                health: this.config.base_health,
                 id: this.bases.length,
-                owner: this.owner,
+                owner: this.config.server_player,
             });
             this.map[base.x][base.y] = this.config.ascii.base;
             this.bases.push(base);
@@ -198,8 +202,9 @@
             let base = new Base({
                 x: cur.x,
                 y: cur.y,
+                health: this.config.base_health,
                 id: this.bases.length,
-                onwer: this.owner,
+                owner: this.config.server_player,
             });
             base.neighbors.push(origin.id);
             origin.neighbors.push(base.id);
@@ -287,7 +292,11 @@
             // console.log(`Updating base ${base.spawn_time}`);
             base.spawn_time--;
             if(base.spawn_time <= 0){
-                base.lanes.forEach(laneId => this.spawnCreep(base, this.lanes[laneId]));
+                base.lanes.forEach(laneId => {
+                    let lane = this.lanes[laneId];
+                    if(this.bases[lane.from].owner === this.bases[lane.to].owner) return;
+                    this.spawnCreep(base, lane);
+                });
                 base.spawn_time = this.config.spawn_time_base;
                 return;
             }
@@ -315,7 +324,7 @@
         }
 
         getCreepTile(creep){
-        return this.lanes[creep.lane].tiles[creep.lane_index];
+            return this.lanes[creep.lane].tiles[creep.lane_index];
         }
 
         getCreepNextTile(creep){
@@ -329,14 +338,23 @@
             // Move
             creep.lane_index += creep.direction;
             if(creep.lane_index < 0 || creep.lane_index >= this.lanes[creep.lane].tiles.length){
-                console.log(`Creep out of bounds`);
+                console.log(`Creep hit base`);
+                let baseId = creep.base === this.lanes[creep.lane].from ? this.lanes[creep.lane].to : this.lanes[creep.lane].from,
+                    base = this.bases[baseId];
+                base.health--;
+                // Base death
+                if(base.health <= 0){
+                    base.health = this.config.base_health;
+                    base.owner = this.getCreepOwner(creep);
+                }
                 creep.dead = true;
             }
         }
 
         getCreep(id){
-            for(let i = 0; i < this.creeps.length; i++)
-                if(this.creeps[i].id === id) return this.creeps[i];
+            return this.creeps[id];
+            // for(let i = 0; i < this.creeps.length; i++)
+            //     if(this.creeps[i].id === id) return this.creeps[i];
         }
 
         updateTower(tower){
@@ -348,6 +366,7 @@
                 if(!creep) tower.target = null;
                 if(creep.dead) tower.target = null;
                 else if(Map.distance(creep, tower) > tower.attack_radius) tower.target = null;
+                else if(this.getTowerOwner(tower) === this.getCreepOwner(creep)) tower.target = null;
             }
 
             // acquire new target
@@ -356,6 +375,7 @@
                     target_dist = Infinity;
                 this.creeps.forEach(creep => {
                     if(creep.dead) return;
+                    if(this.getCreepOwner(creep) === this.getTowerOwner(tower)) return;
                     let dist = Map.distance(this.getCreepTile(creep), tower);
                     // console.log(creep, tower);
                     // console.log(dist, tower.attack_radius)
@@ -378,6 +398,23 @@
                 }
             }
         }
+        
+        // spawnPlayerBase(base, player){
+        //     if(base.player !== this.config.server_player){
+        //         console.error("Another player already owns this base!");
+        //         return
+        //     }
+        //     base.owner = player;
+        // }
+
+        getCreepOwner(creep){
+            return this.bases[creep.base].owner;
+        }
+
+        getTowerOwner(tower){
+            return this.bases[tower.base].owner;
+        }
+
     }
 
     // Node

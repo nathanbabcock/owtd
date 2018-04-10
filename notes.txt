@@ -282,3 +282,33 @@ conditional require <-- let's do this.
 
 1hr refactor away from Browserify (native nodejs/browser interop)
 0.5hr tower attack
+0.5hr creep object pooling
+
+Render TODO: 
+- tower attack
+- minion hp
+- pan + zoom
+- clean minimalist graphics + color scheme
+- base detail UI, incl. radius
+- tower detail UI, incl. radius
+
+Engine TODO:
+X different teams/players/owners
+X base dmg
+- base health regen
+X don't spawn creeps on lanes between friendly bases
+
+Meta TODO:
+- refactor Render to a module?
+- refactor "Map" -> "Game" or "OWTD"?
+- refactor classes like Base, Lane, Creep???
+	- Duck typing everwhere with constructor methods?
+- separate file for config.js?
+	- Defaults overridable by Map() constructor?
+- config subobjects (creep_base_health -> creep.base_health)
+
+are bases ai-controlled before a new player spawns on them?
+do ai bases level up? are they locked to a specific level
+what stops a DoS attack where a guy opens 100 browser tabs and spawns 100 bases
+
+0.5hr owners, base capture
