@@ -63,6 +63,7 @@ graphics.lineStyle(4, 0x000000);
 map.creeps.forEach(creep => {
     graphics.beginFill(0xFF00FF);
     let tile = map.getCreepTile(creep);
+    let nextTile = map.getCreepNextTile(creep);
     graphics.drawCircle(tile.x * renderConfig.grid_size, tile.y * renderConfig.grid_size, renderConfig.creep_radius);
     graphics.endFill();
 });

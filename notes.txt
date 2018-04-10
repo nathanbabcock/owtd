@@ -262,3 +262,8 @@ keyword: Deterministic Lockstep
 see also: Snapshot interpolation
 
 4/6 0.5hr refactor/supporting code for creep movement
+
+4/9
+
+PIXI.js for rendering
+Lance.gg for networking
