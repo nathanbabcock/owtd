@@ -225,10 +225,10 @@ module.exports = class Map {
     //// Game engine
     update(){
         console.log("Map.update()");
-        console.log(this);
         //this.towers.forEach(this.updateTower);
         this.bases.forEach(this.updateBase, this);
-        // this.creeps.forEach(this.updateCreep, this);
+        this.creeps.forEach(this.updateCreep, this);
+        // console.log(this.getCreepTile(this.creeps[0]).x);
     }
 
     updateBase(base){
@@ -241,7 +241,7 @@ module.exports = class Map {
                     base: base.id,
                     lane:lane.id,
                     id: this.creeps.length,
-                    direction: base.id === lane.from ? -1 : 1,
+                    direction: base.id === lane.from ? 1 : -1,
                     lane_index: base.id === lane.from ? 0 : lane.tiles.length - 1,
                 });
                 this.creeps.push(creep);
@@ -253,6 +253,7 @@ module.exports = class Map {
     }
 
     getCreepTile(creep){
+        console.log("Creep lane index = ",creep.lane_index);
        return this.lanes[creep.lane].tiles[creep.lane_index];
     }
 
@@ -262,13 +263,19 @@ module.exports = class Map {
     }
 
     updateCreep(creep){
+        // console.log("UPDATE CREEP");
         // Move
         creep.lane_index += creep.direction;
-        if((creep.direction === -1 && creep.lane_index >= this.lanes[creep.lane].tiles.length)
-            || (creep.direction === 1 && creep.lane_index < 0)){
-            console.log(`Creep hit base`);
+        console.log("creep.direction", creep.direction);
+        // if((creep.direction === -1 && creep.lane_index >= this.lanes[creep.lane].tiles.length)
+        //     || (creep.direction === 1 && creep.lane_index < 0)){
+        //     console.log(`Creep hit base`);
+        //     this.creeps.splice(this.creeps.indexOf(creep), 1);
+        // } 
+        if(creep.lane_index < 0 || creep.lane_index >= this.lanes[creep.lane].tiles.length){
+            console.log(`Creep out of bounds`);
             this.creeps.splice(this.creeps.indexOf(creep), 1);
-        } 
+        }
     }
 
 }

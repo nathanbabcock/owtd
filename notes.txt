@@ -262,3 +262,9 @@ keyword: Deterministic Lockstep
 see also: Snapshot interpolation
 
 4/6 0.5hr refactor/supporting code for creep movement
+
+4/8: 1 hr struggling fruitlessly at home
+
+Why is the git repo not pushing???
+
+4/9: proper PIXI integration at home

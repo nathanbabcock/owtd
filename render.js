@@ -59,10 +59,31 @@ graphics.lineStyle(4, 0x000000);
     graphics.lineTo(lane.to.x  * renderConfig.grid_size, lane.to.y * renderConfig.grid_size);
 });
 
-// Creeps
-map.creeps.forEach(creep => {
-    graphics.beginFill(0xFF00FF);
-    let tile = map.getCreepTile(creep);
-    graphics.drawCircle(tile.x * renderConfig.grid_size, tile.y * renderConfig.grid_size, renderConfig.creep_radius);
-    graphics.endFill();
+
+// Preload creep graphics
+var creepGraphics = new PIXI.Graphics();
+creepGraphics.beginFill(0xFF00FF);
+creepGraphics.drawCircle(0, 0, renderConfig.creep_radius);
+creepGraphics.endFill();
+
+
+function renderCreeps(){
+    // Creeps
+    map.creeps.forEach(creep => {
+        if(!creep.sprite)
+            creep.sprite = new PIXI.Sprite(creepGraphics.generateCanvasTexture());
+        let tile = map.getCreepTile(creep);
+        creep.sprite.x = tile.x * renderConfig.grid_size;
+        creep.sprite.y = tile.y * renderConfig.grid_size;
+        creep.sprite.anchor.x = creep.sprite.anchor.y = 0.5;
+        app.stage.addChild(creep.sprite);
+    });
+}
+
+
+
+app.ticker.add(function() {
+    console.log("PIXI update");
+    renderCreeps();
+    app.renderer.render(app.stage);
 });
