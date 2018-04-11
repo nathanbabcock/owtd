@@ -312,3 +312,53 @@ do ai bases level up? are they locked to a specific level
 what stops a DoS attack where a guy opens 100 browser tabs and spawns 100 bases
 
 0.5hr owners, base capture
+
+4/11
+
+how will levelling up work?
+- TOWERS UPGRADE:
+	- attack radius
+	- damage
+- UNITS UPGRADE:
+	- spawn rate
+	- health
+	- damage
+- also towers need to be built in the first place of course
+- killing enemy creeps generates cash
+	- higher level = more cash?? or nah. maybe nah for now
+- cash is shared between all bases
+- server needs to keep track (in memory) of all players, their cash, their username, their preferred color
+- if you lose (all bases captured) you lose all your money and you spawn again with 0
+- option to FF and restart
+- all bases are AI controlled when not owned by players (?)
+	- permanently level 1? permanently mid-level?
+- will there be a snowball effect of capturing a whole series of AI bases? why not?
+	- upgrade price balancing
+	- offensive upgrades cost >> defensive upgrade cost
+- bases show an "upgrade level" (= number of base upgrades purchased)
+	- Renders on the base icon
+
+Graphicsss
+- Lanes are color coded
+	- Grey = contested (between enemy bases)
+	- Colored = safe (between friendly bases)
+- Bases match player color
+- Empty tower slots are empty circles (grey, or less-saturated primary)
+- What should built towers look like?
+	- must have an apparent direction (rotating to focus creeps)
+	- but still minimialist
+- Bases are just solid primary-colored big circles with the level inscribed
+- How to do health bars? (creeps and bases)
+	- Discrete health bubbles, not continuous bar
+	- Pie slices?
+		- Minions probably too small for this
+	- Diminishing concentric circles
+
+REFACTOR TODO:
+- config -> config.js
+- class Map -> Game {}
+
+idea: base health is always bought ???
+- abuse potential
+
+initial upgrades to be implemented: tower dmg, tower radius, minion hp, minion spawn rate

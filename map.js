@@ -38,6 +38,8 @@
             this.neighbors = [];
             this.lanes = [];
             this.spawn_time = 0;
+            this.spawn_rate_tier = 0;
+            this.creep_health_tier = 0;
         }
     }
 
@@ -48,6 +50,12 @@
             this.towers = [];
             this.lanes = [];
             this.creeps = [];
+            this.players = {
+                "excalo": {
+                    money: 0,
+                    color: "blue",
+                }
+            };
             this.last_update = Date.now();
             this.player = "excalo",
             this.config = {
@@ -80,6 +88,54 @@
                 tower_base_attack_radius: 5,
                 tower_base_damage: 1,
                 server_player: "server",
+                creep_cash_value: 10,
+                tower_price: 100,
+                tiers: {
+                    tower: {
+                        damage: [
+                            { value: 1, price: 100 },
+                            { value: 2, price: 200 },
+                            { value: 3, price: 300 },
+                            { value: 4, price: 400 },
+                        ],
+                        radius: [
+                            { value: 5, price: 100 },
+                            { value: 6, price: 200 },
+                            { value: 7, price: 300 },
+                        ]
+                    },
+                    base: {
+                        // health: [
+                        //     { value: 5, price: 500 },
+                        //     { value: 6, price: 500 },
+                        //     { value: 7, price: 500 },
+                        //     { value: 8, price: 500 },
+                        //     { value: 9, price: 500 },
+                        //     { value: 10, price: 500 },
+                        // ],
+                        spawn_rate: [
+                            { value: 5, price: 100 },
+                            { value: 4, price: 250 },
+                            { value: 3, price: 500 },
+                            { value: 2, price: 1000 },
+                            { value: 1, price: 10000 },
+                        ],
+                    },
+                    creep: {
+                        health: [
+                            { value: 1, price: 100},
+                            { value: 2, price: 200},
+                            { value: 3, price: 300},
+                            { value: 4, price: 400},
+                            { value: 5, price: 500},
+                        ],
+                        // damage: [
+                        //     { value: 1, price: 100},
+                        //     { value: 2, price: 500},
+                        //     { value: 3, price: 1000},
+                        // ],
+                    }
+                },
             }
         }
         
@@ -254,7 +310,8 @@
                             target: null,
                             attack_radius: this.config.tower_base_attack_radius,
                             damage: this.config.tower_base_damage,
-                            level: 1,
+                            damage_tier: 0,
+                            radius_tier: 0,
                         };
                         this.towers.push(tower);
                         this.map[tower.x][tower.y] = this.config.ascii.tower;
@@ -297,7 +354,7 @@
                     if(this.bases[lane.from].owner === this.bases[lane.to].owner) return;
                     this.spawnCreep(base, lane);
                 });
-                base.spawn_time = this.config.spawn_time_base;
+                base.spawn_time = this.config.tiers.base.spawn_rate[base.spawn_rate_tier];
                 return;
             }
         }
@@ -319,7 +376,7 @@
             creep.lane = lane.id;
             creep.direction = base.id === lane.from? 1 : -1;
             creep.lane_index = base.id === lane.from? 0 : lane.tiles.length - 1;
-            creep.health = this.config.creep_base_health;
+            creep.health = this.config.tiers.creep.health[base.creep_health_tier];
             creep.dead = false;
         }
 
@@ -359,13 +416,14 @@
 
         updateTower(tower){
             tower.attack_cooldown--;
+            let attack_radius = this.config.tiers.tower.radius[tower.radius_tier];
 
             // Check old target
             if(tower.target){
                 let creep = this.getCreep(tower.target);
                 if(!creep) tower.target = null;
                 if(creep.dead) tower.target = null;
-                else if(Map.distance(creep, tower) > tower.attack_radius) tower.target = null;
+                else if(Map.distance(creep, tower) > attack_radius) tower.target = null;
                 else if(this.getTowerOwner(tower) === this.getCreepOwner(creep)) tower.target = null;
             }
 
@@ -379,18 +437,19 @@
                     let dist = Map.distance(this.getCreepTile(creep), tower);
                     // console.log(creep, tower);
                     // console.log(dist, tower.attack_radius)
-                    if(dist <= tower.attack_radius && dist < target_dist)
+                    if(dist <= attack_radius && dist < target_dist)
                         target = creep;
                 });
                 if(target !== null)
                     tower.target = target.id;
             }
 
-            // Attack taret
+            // Attack target
             if(tower.target && tower.attack_cooldown <= 0){
                 tower.attack_cooldown = this.config.tower_attack_cooldown;
                 let creep = this.getCreep(tower.target);
-                creep.health--;
+                let tower_damage = this.config.tiers.tower.damage[tower.damage_tier];
+                creep.health -= tower_damage;
                 if(creep.health <= 0){
                     // console.log("Creep died to tower");
                     creep.dead = true;
@@ -407,7 +466,7 @@
         //     base.owner = player;
         // }
 
-        getCreepOwner(creep){
+        getCreepOwner(creep){ // TODO refactor these inline?
             return this.bases[creep.base].owner;
         }
 
