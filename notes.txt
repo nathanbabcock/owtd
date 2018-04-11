@@ -368,3 +368,23 @@ TODO:
 - buy upgrade > 1 tier above (prevent?)
 
 1hr upgrade implementation
+
+ENGINE TODO:
+- Tower purchase
+- Base capture destroy all tower?
+
+VIEW TODO:
+- pan and zoom map
+- zoom levels
+- Proper graphics
+- Team colors
+- Overlay panel
+	- Creep
+	- Base
+	- Tower
+- Clear panel on click again
+- Sync overlay panel with model
+- line connecting screen space (overlay) to world space (game object), taking into account transform matrix from pan & zoom
+
+NETWORK TODO:
+- Everything.
