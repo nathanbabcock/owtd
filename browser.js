@@ -5,7 +5,9 @@
 
 let map = new Map();
 map.gen();
-chance.pickone(map.bases).owner = "excalo";
+let mybase = chance.pickone(map.bases);
+mybase.owner = "excalo";
+map.buyUpgrade("excalo", mybase, "spawn_rate_tier", map.config.tiers.base.spawn_rate, 1);
 // map.update();
 // console.log(map.toString());
 

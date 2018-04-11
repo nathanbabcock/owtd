@@ -52,7 +52,7 @@
             this.creeps = [];
             this.players = {
                 "excalo": {
-                    money: 0,
+                    money: 1000,
                     color: "blue",
                 }
             };
@@ -473,6 +473,69 @@
         getTowerOwner(tower){
             return this.bases[tower.base].owner;
         }
+
+        // Warning: heavy duck typing
+        buyUpgrade(player, gameobject, upgrade_field, upgrade_config, tier){
+            if(!this.players[player]){
+                console.error(`Could not find player ${player}`);
+                return false;
+            }
+
+            if(gameobject === undefined){
+                console.error(`Could not find game object ${gameobject} in buyUpgrade`);
+                return false;
+            }
+
+            if(gameobject[upgrade_field] === undefined){
+                console.error(`Could not find upgrade field ${upgrade_field} in gameobject ${gameobject}`);
+                return false;
+            }
+
+            if(upgrade_config === undefined){
+                console.error(`Could not find upgrade config ${upgrade_config}`);
+                return false;
+            }
+
+            if(tier === undefined){
+                console.error(`No tier specified for upgrade`);
+                return false;
+            }
+
+            if(tier <= gameobject[upgrade_field]){
+                console.error(`Requested tier ${tier} is less than or equal to current upgrade tier for upgrade ${upgrade_field} on gameobject ${gameobject}`);
+                return false;
+            }
+
+            if(tier >= gameobject[upgrade_field] + 2){
+                console.error(`Requested tier ${tier} is more than one tier away from current tier ${gameobject[upgrade_field]} for upgrade ${upgrade_field} on gameobject ${gameobject}`);
+                return false;
+            }
+
+            if(tier >= upgrade_config.length){
+                console.error(`Requested tier ${tier} out of bounds`);
+                return false;
+            }
+
+            if(gameobject.owner && gameobject.owner !== player){
+                console.error('Cannot buy upgrade for gameobject owned by another player');
+                return false;
+            }
+
+            if(gameobject.base && this.bases[base].owner !== player){
+                console.error('Cannot buy upgrade for gameobject owned by another player');
+                return false;
+            }
+
+            if(this.players[player].money < upgrade_config[tier].price){
+                console.error(`Not enough money for upgrade purchase`);
+                return false;
+            }
+
+            this.players[player].money -= upgrade_config[tier].price;
+            gameobject.upgrade_field = tier;
+            console.log("Upgrade purchased succesfully.");
+        }
+        //buyUpgrade("excalo", base, "spawn_rate_tier", this.config.tiers.base.spawn_rate, 2)
 
     }
 
