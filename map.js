@@ -1,9 +1,8 @@
-"use strict";
-
 (function(){
     //// REQUIRE
     if(typeof module !== "undefined") {
         chance = new require('chance')();
+        config = require('./config');
     }
 
     class Creep {
@@ -57,86 +56,7 @@
                 }
             };
             this.last_update = Date.now();
-            this.player = "excalo",
-            this.config = {
-                width:options.width || 100,
-                height:options.height || 100,
-                bases:options.bases || 1000,
-                base_radius: 5,
-                base_health: 5,
-                max_lane_dist: 20,
-                max_neighbors: 3,
-                procgen: {
-                    lane_dist_mean: 15,
-                    lane_dist_dev: 0,
-                    lane_turn_mean: 5,
-                    lane_turn_dev: 5,
-                    towers_per_lane_mean: 8,
-                    towers_per_lane_dev: 2,
-                },
-                ascii: {
-                    empty: ' ',
-                    tower: 'T',
-                    base:  'B',
-                    lane:  '+',
-                    creep: 'o'
-                },
-                spawn_time_base: 5,
-                tick_rate: 1000,
-                creep_base_health: 3,
-                tower_attack_cooldown: 1,
-                tower_base_attack_radius: 5,
-                tower_base_damage: 1,
-                server_player: "server",
-                creep_cash_value: 10,
-                tower_price: 100,
-                tiers: {
-                    tower: {
-                        damage: [
-                            { value: 1, price: 100 },
-                            { value: 2, price: 200 },
-                            { value: 3, price: 300 },
-                            { value: 4, price: 400 },
-                        ],
-                        radius: [
-                            { value: 5, price: 100 },
-                            { value: 6, price: 200 },
-                            { value: 7, price: 300 },
-                        ]
-                    },
-                    base: {
-                        // health: [
-                        //     { value: 5, price: 500 },
-                        //     { value: 6, price: 500 },
-                        //     { value: 7, price: 500 },
-                        //     { value: 8, price: 500 },
-                        //     { value: 9, price: 500 },
-                        //     { value: 10, price: 500 },
-                        // ],
-                        spawn_rate: [
-                            { value: 5, price: 100 },
-                            { value: 4, price: 250 },
-                            { value: 3, price: 500 },
-                            { value: 2, price: 1000 },
-                            { value: 1, price: 10000 },
-                        ],
-                    },
-                    creep: {
-                        health: [
-                            { value: 1, price: 100},
-                            { value: 2, price: 200},
-                            { value: 3, price: 300},
-                            { value: 4, price: 400},
-                            { value: 5, price: 500},
-                        ],
-                        // damage: [
-                        //     { value: 1, price: 100},
-                        //     { value: 2, price: 500},
-                        //     { value: 3, price: 1000},
-                        // ],
-                    }
-                },
-            }
+            this.player = "excalo"
         }
         
         //// UTIL
@@ -162,10 +82,10 @@
         init(){
             console.log("Initializing empty map");
             this.map = [];
-            for(let x = 0; x < this.config.width; x++){
+            for(let x = 0; x < config.width; x++){
                 this.map[x] = [];
-                for(let y = 0; y < this.config.height; y++)
-                    this.map[x][y] = this.config.ascii.empty;
+                for(let y = 0; y < config.height; y++)
+                    this.map[x][y] = config.ascii.empty;
             }
         }
 
@@ -175,21 +95,21 @@
 
             // Place one random base
             let base = new Base({
-                x: chance.integer({min: 0, max:this.config.width - 1}),
-                y: chance.integer({min: 0, max:this.config.height - 1}),
-                health: this.config.base_health,
+                x: chance.integer({min: 0, max:config.width - 1}),
+                y: chance.integer({min: 0, max:config.height - 1}),
+                health: config.base_health,
                 id: this.bases.length,
-                owner: this.config.server_player,
+                owner: config.server_player,
             });
-            this.map[base.x][base.y] = this.config.ascii.base;
+            this.map[base.x][base.y] = config.ascii.base;
             this.bases.push(base);
             
             let success = 0,
                 fail = 0;
-            while(this.bases.length < this.config.bases){
+            while(this.bases.length < config.bases){
                 if(this.addBase()) success++;
                 else fail++;
-                if(fail >= this.config.width * this.config.height * 2) break; // Maxed out available area
+                if(fail >= config.width * config.height * 2) break; // Maxed out available area
             }
 
             console.log(`Generated ${this.bases.length} bases (${fail} retries)`);
@@ -199,7 +119,7 @@
             let origin = chance.pickone(this.bases),
                 cur = {x: origin.x, y: origin.y},
                 cur_dir = chance.character({pool: "nsew"}),
-                decided_length = Math.floor(chance.normal({mean:this.config.procgen.lane_dist_mean, dev:this.config.procgen.lane_dist_dev})),
+                decided_length = Math.floor(chance.normal({mean:config.procgen.lane_dist_mean, dev:config.procgen.lane_dist_dev})),
                 lane = [];
         
             // console.log(decided_length);
@@ -208,7 +128,7 @@
         
             while(lane.length < decided_length){
                 // Turn
-                if(chance.bool({likelihood: 100 / this.config.procgen.lane_turn_mean}))
+                if(chance.bool({likelihood: 100 / config.procgen.lane_turn_mean}))
                     cur_dir = chance.character({pool: "nsew".replace(cur_dir, "")});
         
                 // Step
@@ -230,14 +150,14 @@
                 }
         
                 // Edge
-                if(cur.x < 0 || cur.y < 0 || cur.x >= this.config.width || cur.y >= this.config.height) return false;
+                if(cur.x < 0 || cur.y < 0 || cur.x >= config.width || cur.y >= config.height) return false;
         
                 // Self
                 for(let i = 0; i < lane.length; i++)
                     if(Map.samePos(lane[i], cur)) return false;
                 
                 // this.map
-                if(this.map[cur.x][cur.y] !== this.config.ascii.empty) return false;
+                if(this.map[cur.x][cur.y] !== config.ascii.empty) return false;
         
                 // Take the step
                 lane.push(cur);
@@ -246,26 +166,26 @@
             
             // Base proximity
             for(let i = 0; i < this.bases.length; i++)
-                if(Map.distance(cur, this.bases[i]) < this.config.base_radius * 2) return false;
+                if(Map.distance(cur, this.bases[i]) < config.base_radius * 2) return false;
         
             // Plant lane
             let laneObj = new Lane({id: this.lanes.length});
             laneObj.tiles = lane;
             this.lanes.push(laneObj);
-            lane.forEach(tile => this.map[tile.x][tile.y] = this.config.ascii.lane);
+            lane.forEach(tile => this.map[tile.x][tile.y] = config.ascii.lane);
         
             // Plant base
             let base = new Base({
                 x: cur.x,
                 y: cur.y,
-                health: this.config.base_health,
+                health: config.base_health,
                 id: this.bases.length,
-                owner: this.config.server_player,
+                owner: config.server_player,
             });
             base.neighbors.push(origin.id);
             origin.neighbors.push(base.id);
             this.bases.push(base);
-            this.map[base.x][base.y] = this.config.ascii.base;
+            this.map[base.x][base.y] = config.ascii.base;
 
             // Lane attachment
             origin.lanes.push(laneObj.id);
@@ -277,10 +197,10 @@
             let potential_towers = [];
             for(let i = 0; i < lane.length - 1; i++){
                 let tile = lane[i];
-                //if(distance(tile, origin) > this.config.base_radius) break;
+                //if(distance(tile, origin) > config.base_radius) break;
                 let adjacent = Map.getAdjacent(tile)
-                        .filter(adj => adj.x >= 0 && adj.y >= 0 && adj.x < this.config.width && adj.y < this.config.height)
-                        .filter(adj => this.map[adj.x][adj.y] === this.config.ascii.empty)
+                        .filter(adj => adj.x >= 0 && adj.y >= 0 && adj.x < config.width && adj.y < config.height)
+                        .filter(adj => this.map[adj.x][adj.y] === config.ascii.empty)
                         .filter(adj => !potential_towers.includes(adj));
                 // } catch (e) {
                 //     console.error(`Error occurred while checking for towerslot at x=${tile.x}, y=${tile.y}`);
@@ -291,12 +211,12 @@
             }
         
             if(potential_towers.length > 0)
-                chance.pickset(potential_towers, chance.normal({mean:this.config.procgen.towers_per_lane_mean, dev:this.config.procgen.towers_per_lane_dev}))
+                chance.pickset(potential_towers, chance.normal({mean:config.procgen.towers_per_lane_mean, dev:config.procgen.towers_per_lane_dev}))
                     .forEach(towerslot => {
                         let owner = null;
-                        if(Map.distance(towerslot, origin) <= this.config.base_radius)
+                        if(Map.distance(towerslot, origin) <= config.base_radius)
                             owner = origin;
-                        else if (Map.distance(towerslot, base) <= this.config.base_radius)
+                        else if (Map.distance(towerslot, base) <= config.base_radius)
                             owner = base;
                         else
                             return;
@@ -308,13 +228,13 @@
                             base: owner.id,
                             attack_cooldown: 0,
                             target: null,
-                            attack_radius: this.config.tower_base_attack_radius,
-                            damage: this.config.tower_base_damage,
+                            attack_radius: config.tower_base_attack_radius,
+                            damage: config.tower_base_damage,
                             damage_tier: 0,
                             radius_tier: 0,
                         };
                         this.towers.push(tower);
-                        this.map[tower.x][tower.y] = this.config.ascii.tower;
+                        this.map[tower.x][tower.y] = config.ascii.tower;
                     });
         
             return base;
@@ -322,10 +242,10 @@
 
         toString(){
             let output = "";
-            for(let x = 0; x < this.config.width; x++){
-                for(let y = 0; y < this.config.height; y++){
+            for(let x = 0; x < config.width; x++){
+                for(let y = 0; y < config.height; y++){
                     // let creepFound = false;
-                    // output += creepFound ? this.config.ascii.creep : this.map[x][y];
+                    // output += creepFound ? config.ascii.creep : this.map[x][y];
                     output += this.map[x][y];
                 }
                 output += '\n';
@@ -354,7 +274,7 @@
                     if(this.bases[lane.from].owner === this.bases[lane.to].owner) return;
                     this.spawnCreep(base, lane);
                 });
-                base.spawn_time = this.config.tiers.base.spawn_rate[base.spawn_rate_tier];
+                base.spawn_time = config.tiers.base.spawn_rate[base.spawn_rate_tier];
                 return;
             }
         }
@@ -376,7 +296,7 @@
             creep.lane = lane.id;
             creep.direction = base.id === lane.from? 1 : -1;
             creep.lane_index = base.id === lane.from? 0 : lane.tiles.length - 1;
-            creep.health = this.config.tiers.creep.health[base.creep_health_tier];
+            creep.health = config.tiers.creep.health[base.creep_health_tier];
             creep.dead = false;
         }
 
@@ -401,7 +321,7 @@
                 base.health--;
                 // Base death
                 if(base.health <= 0){
-                    base.health = this.config.base_health;
+                    base.health = config.base_health;
                     base.owner = this.getCreepOwner(creep);
                 }
                 creep.dead = true;
@@ -416,7 +336,7 @@
 
         updateTower(tower){
             tower.attack_cooldown--;
-            let attack_radius = this.config.tiers.tower.radius[tower.radius_tier];
+            let attack_radius = config.tiers.tower.radius[tower.radius_tier];
 
             // Check old target
             if(tower.target){
@@ -446,9 +366,9 @@
 
             // Attack target
             if(tower.target && tower.attack_cooldown <= 0){
-                tower.attack_cooldown = this.config.tower_attack_cooldown;
+                tower.attack_cooldown = config.tower_attack_cooldown;
                 let creep = this.getCreep(tower.target);
-                let tower_damage = this.config.tiers.tower.damage[tower.damage_tier];
+                let tower_damage = config.tiers.tower.damage[tower.damage_tier];
                 creep.health -= tower_damage;
                 if(creep.health <= 0){
                     // console.log("Creep died to tower");
@@ -459,7 +379,7 @@
         }
         
         // spawnPlayerBase(base, player){
-        //     if(base.player !== this.config.server_player){
+        //     if(base.player !== config.server_player){
         //         console.error("Another player already owns this base!");
         //         return
         //     }
@@ -535,7 +455,7 @@
             gameobject.upgrade_field = tier;
             console.log("Upgrade purchased succesfully.");
         }
-        //buyUpgrade("excalo", base, "spawn_rate_tier", this.config.tiers.base.spawn_rate, 2)
+        //buyUpgrade("excalo", base, "spawn_rate_tier", config.tiers.base.spawn_rate, 2)
 
     }
 

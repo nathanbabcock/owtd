@@ -362,3 +362,9 @@ idea: base health is always bought ???
 - abuse potential
 
 initial upgrades to be implemented: tower dmg, tower radius, minion hp, minion spawn rate
+
+TODO:
+- buy each type of upgrade
+- buy upgrade > 1 tier above (prevent?)
+
+1hr upgrade implementation
