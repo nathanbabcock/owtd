@@ -437,3 +437,42 @@ Rules:
 - Must call some form of serializer.register(Class)
 
 2hr research and plan standalone javascript object delta networking lib (just for fun)
+
+Delta lib:
+- register an observer/proxy on a server object
+- generates a delta which accumulates all object changes until ??
+
+
+Components:
+- Delta generation
+	- Recursive Proxy() wrapper
+	- Full state history and diff each step
+	- Object.watch() polyfill
+- Delta transmission
+	- Clients need to ACK?
+- Delta serialization
+	- msgpack
+	- field name table (either deterministically inferred or configured on client and server)
+
+handle object references (?)
+
+game = {
+	creeps {
+		1: {
+			pos: {
+				x: 23,
+				y: 45
+			},
+			base: @["game", "bases", "0"]
+		}
+	} 
+}
+
+problem: dangling references to non-proxified versions of game objects
+
+it doesn't look like this can be a drop-in replacement. your game object classes must extend DynamicObject which implements the watchers
+
+Delta *generation* is the really hard part... either observing with deeply nested proxies, or making deep copies and doing diffs every time...
+Once you have the delta, serialization can be taken care of and optimized a ton optionally
+Applying the delta is even easier.
+All I want to do is just serialize the bits of gamestate that different clients care about
