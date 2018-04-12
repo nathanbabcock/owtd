@@ -388,3 +388,52 @@ VIEW TODO:
 
 NETWORK TODO:
 - Everything.
+
+4/12:
+
+temptation to do networking from scratch
+
+Full creep update: 
+{
+	this.id = options.id;
+	this.base = options.base;
+	this.lane = options.lane;
+	this.lane_index = options.lane_index;
+	this.direction = options.direction;
+	this.health = options.health;
+	this.x = options.x;
+	this.y = options.y;
+	this.dead = false;
+}
+
+Delta creep update:
+{
+	this.lane_index = options.lane_index;
+	this.health = options.health;
+}
+
+creep 0 lane_index 1 health 1
+
+<creeps> <number of creeps> <creep id> <fields modified> <field> <value> ...
+creeps 1 0 lane_index 3 health 4
+0 1 0 0 3 4 3
+just write your own serializer bro
+just do it its easy
+its just binary bro
+think how efficient it would be
+so elegant and optimized
+mmmm
+what, do you want to hack your beatiful bespoke data structures into lance.gg or json_patch or something?
+gross.
+dont let them get contaminated with that filth
+model it like a VCS?
+every tick creates a delta (with a tick timestamp)
+clients send ACKs of which server tick they are up to date with?
+Collections which are synchronized
+is there a way to do this abstractly, with reflection?
+
+Rules:
+- Collections are object-pooled (semi-immutable -- collections only grow, items shouldnt be removed per-se)
+- Must call some form of serializer.register(Class)
+
+2hr research and plan standalone javascript object delta networking lib (just for fun)
