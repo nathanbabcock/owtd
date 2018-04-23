@@ -40,6 +40,7 @@ app.stage.addChild(viewport);
 // activate plugins
 viewport
     .drag()
+    .wheel()
     .pinch()
     .decelerate();
  
