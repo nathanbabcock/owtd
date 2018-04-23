@@ -24,8 +24,35 @@ let app = new PIXI.Application({
 window.addEventListener('resize', () => app.renderer.resize(window.innerWidth - 25, window.innerHeight - 25));
 document.body.appendChild(app.view);
 
+// create viewport
+var viewport = new Viewport({
+    screenWidth: window.innerWidth,
+    screenHeight: window.innerHeight,
+    worldWidth: 1000,
+    worldHeight: 1000
+});
+ 
+// add the viewport to the stage
+// var app = new PIXI.Application();
+// document.body.appendChild(app.view);
+app.stage.addChild(viewport);
+ 
+// activate plugins
+viewport
+    .drag()
+    .pinch()
+    .decelerate();
+ 
+// add a red box
+var sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+sprite.tint = 0xff0000;
+sprite.width = sprite.height = 100
+sprite.position.set(100, 100);
+
+
+
 var graphics = new PIXI.Graphics();
-app.stage.addChild(graphics);
+viewport.addChild(graphics);
 
 let renderConfig = {
     grid_size: 25,

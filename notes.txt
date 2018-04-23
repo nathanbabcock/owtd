@@ -275,6 +275,32 @@ Lance.gg for networking
 
 1hr proper PIXI integration at home
 
+TODO next:
+- towers attack creeps
+	- towers and creeps know their team
+	- creeps have health
+	- creeps die
+	- tower sprite render
+	- tower attack render
+	- creep health render
+- creeps attack base
+	- base knows their team
+	- base has health
+	- base dies
+- color code teams (creeps, towers, bases)
+- UI to build towers
+- pan/zoom canvas
+- clean sprite graphics
+====
+- teams/players get currency
+- bases level up
+	- higher creep spawn rate/higher creep health
+- towers can be upgraded
+
+Refactoring TODO:
+- either ditch browserify or use gulp/grunt
+
+
 4/10:
 Either Browserify + Grunt + manually export to window
 -OR-
