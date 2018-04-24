@@ -105,8 +105,11 @@ function renderCreeps(){
         // TODO death anim here?
         if(creep.dead && creep.sprite)
             creep.sprite.visible = false;
+        
         else if(!creep.dead && creep.sprite && !creep.sprite.visible)
             creep.sprite.visible = true;
+
+        if(creep.dead) return;
 
         // Spawn sprite for the first time
         if(!creep.sprite){
@@ -115,29 +118,23 @@ function renderCreeps(){
             viewport.addChild(creep.sprite);
         }
 
-        try {
-            // Interpolate movement between grid squares
-            let delta_time = Date.now() - map.last_update,
-                tick_ratio = delta_time / config.tick_rate,
-                tile = map.getCreepTile(creep),
-                next_tile = map.getCreepNextTile(creep),
-                delta_x = next_tile.x - tile.x,
-                delta_y = next_tile.y - tile.y;
+        // Interpolate movement between grid squares
+        let delta_time = Date.now() - map.last_update,
+            tick_ratio = delta_time / config.tick_rate,
+            tile = map.getCreepTile(creep),
+            next_tile = map.getCreepNextTile(creep);
 
-                // console.log("delta_time", delta_time);
-                // console.log("TICK RATIO", tick_ratio);
-
-            // Move sprite
-            creep.sprite.x = (tile.x + delta_x * tick_ratio) * renderConfig.grid_size;
-            creep.sprite.y = (tile.y + delta_y * tick_ratio) * renderConfig.grid_size;
-
-            // console.log(creep, tile, next_tile);
-
-        } catch (e) {
-            console.error(e);
-            // TODO what to do here
-            //viewport.removeChild(creep.sprite);
+        if(tile === undefined || next_tile === undefined){
+            creep.sprite.visible = false;
+            return;
         }
+
+        let delta_x = next_tile.x - tile.x,
+            delta_y = next_tile.y - tile.y;
+
+        // Move sprite
+        creep.sprite.x = (tile.x + delta_x * tick_ratio) * renderConfig.grid_size;
+        creep.sprite.y = (tile.y + delta_y * tick_ratio) * renderConfig.grid_size;
     });
 }
 
