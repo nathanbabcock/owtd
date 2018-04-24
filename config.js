@@ -1,7 +1,7 @@
 let config = {
-    width: 100,
-    height: 100,
-    bases: 1000,
+    width: 25,
+    height: 25,
+    bases: 3,
     base_radius: 5,
     base_health: 5,
     max_lane_dist: 20,

@@ -112,13 +112,13 @@ function renderCreeps(){
         if(!creep.sprite){
             creep.sprite = new PIXI.Sprite(creepGraphics.generateCanvasTexture());
             creep.sprite.anchor.x = creep.sprite.anchor.y = 0.5;
-            app.stage.addChild(creep.sprite);
+            viewport.addChild(creep.sprite);
         }
 
         try {
             // Interpolate movement between grid squares
             let delta_time = Date.now() - map.last_update,
-                tick_ratio = delta_time / map.config.tick_rate,
+                tick_ratio = delta_time / config.tick_rate,
                 tile = map.getCreepTile(creep),
                 next_tile = map.getCreepNextTile(creep),
                 delta_x = next_tile.x - tile.x,
@@ -130,9 +130,13 @@ function renderCreeps(){
             // Move sprite
             creep.sprite.x = (tile.x + delta_x * tick_ratio) * renderConfig.grid_size;
             creep.sprite.y = (tile.y + delta_y * tick_ratio) * renderConfig.grid_size;
+
+            // console.log(creep, tile, next_tile);
+
         } catch (e) {
+            console.error(e);
             // TODO what to do here
-            //app.stage.removeChild(creep.sprite);
+            //viewport.removeChild(creep.sprite);
         }
     });
 }
