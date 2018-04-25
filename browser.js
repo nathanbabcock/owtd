@@ -22,7 +22,7 @@ let app = new PIXI.Application({
     height:window.innerHeight - 25,
 });
 window.addEventListener('resize', () => app.renderer.resize(window.innerWidth - 25, window.innerHeight - 25));
-document.body.appendChild(app.view);
+// document.body.appendChild(app.view);
 
 // create viewport
 var viewport = new Viewport({
