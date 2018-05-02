@@ -502,3 +502,6 @@ Delta *generation* is the really hard part... either observing with deeply neste
 Once you have the delta, serialization can be taken care of and optimized a ton optionally
 Applying the delta is even easier.
 All I want to do is just serialize the bits of gamestate that different clients care about
+
+5/1:
+trying to resurrect this and finish client side graphics?

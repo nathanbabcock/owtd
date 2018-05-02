@@ -22,7 +22,7 @@ let app = new PIXI.Application({
     height:window.innerHeight - 25,
 });
 window.addEventListener('resize', () => app.renderer.resize(window.innerWidth - 25, window.innerHeight - 25));
-// document.body.appendChild(app.view);
+document.body.appendChild(app.view);
 
 // create viewport
 var viewport = new Viewport({
@@ -60,15 +60,18 @@ let renderConfig = {
     creep_radius: 10,
 };
 
-// Bases
-graphics.beginFill(0xFF3300);
-// graphics.lineStyle(4, 0xffd900, 1);
-map.bases.forEach(base => {
+function getBaseGraphics(base){
     let gfx = new PIXI.Graphics();
     gfx.beginFill(map.players[base.owner].color);
     //gfx.beginFill(base.)
     gfx.drawCircle(0, 0, renderConfig.base_radius);
-    base.sprite = new PIXI.Sprite(gfx.generateCanvasTexture());
+    return gfx;   
+}
+
+// Bases
+// graphics.beginFill(0xFF3300);
+map.bases.forEach(base => {
+    base.sprite = new PIXI.Sprite(getBaseGraphics(base).generateCanvasTexture());
     base.sprite.x = base.x * renderConfig.grid_size;
     base.sprite.y = base.y * renderConfig.grid_size;
     base.sprite.anchor.x = base.sprite.anchor.y = 0.5;
@@ -98,11 +101,18 @@ graphics.lineStyle(4, 0x000000);
 
 
 // Preload creep graphics
-var creepGraphics = new PIXI.Graphics();
-creepGraphics.beginFill(0xFF00FF);
-creepGraphics.drawCircle(0, 0, renderConfig.creep_radius);
-creepGraphics.endFill();
 
+function getCreepOwner(creep){
+    return map.bases[creep.base].owner;
+}
+
+function getCreepGraphics(creep){
+    var creepGraphics = new PIXI.Graphics();
+    creepGraphics.beginFill(map.players[getCreepOwner(creep)].color);
+    creepGraphics.drawCircle(0, 0, renderConfig.creep_radius);
+    creepGraphics.endFill();
+    return creepGraphics;
+}
 
 function renderCreeps(){
     // Creeps
@@ -119,7 +129,9 @@ function renderCreeps(){
 
         // Spawn sprite for the first time
         if(!creep.sprite){
-            creep.sprite = new PIXI.Sprite(creepGraphics.generateCanvasTexture());
+
+
+            creep.sprite = new PIXI.Sprite(getCreepGraphics(creep).generateCanvasTexture());
             creep.sprite.anchor.x = creep.sprite.anchor.y = 0.5;
             viewport.addChild(creep.sprite);
         }
@@ -144,8 +156,15 @@ function renderCreeps(){
     });
 }
 
+function updateBases(){
+    map.bases.forEach(base => {
+        base.sprite.texture = getBaseGraphics(base).generateCanvasTexture();
+    });
+}
+
 app.ticker.add(function() {
     // console.log("PIXI update");
     renderCreeps();
+    updateBases();
     app.renderer.render(app.stage);
 });
