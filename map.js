@@ -50,9 +50,12 @@
             this.lanes = [];
             this.creeps = [];
             this.players = {
+                "server": {
+                    color: 0x707070, // grey
+                },
                 "excalo": {
                     money: 1000,
-                    color: "blue",
+                    color: 0x4286f4, // light blue
                 }
             };
             this.last_update = Date.now();

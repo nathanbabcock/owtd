@@ -45,12 +45,10 @@ viewport
     .decelerate();
  
 // add a red box
-var sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
-sprite.tint = 0xff0000;
-sprite.width = sprite.height = 100
-sprite.position.set(100, 100);
-
-
+// var sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+// sprite.tint = 0xff0000;
+// sprite.width = sprite.height = 100
+// sprite.position.set(100, 100);
 
 var graphics = new PIXI.Graphics();
 viewport.addChild(graphics);
@@ -66,7 +64,15 @@ let renderConfig = {
 graphics.beginFill(0xFF3300);
 // graphics.lineStyle(4, 0xffd900, 1);
 map.bases.forEach(base => {
-    graphics.drawCircle(base.x * renderConfig.grid_size, base.y * renderConfig.grid_size, renderConfig.base_radius);
+    let gfx = new PIXI.Graphics();
+    gfx.beginFill(map.players[base.owner].color);
+    //gfx.beginFill(base.)
+    gfx.drawCircle(0, 0, renderConfig.base_radius);
+    base.sprite = new PIXI.Sprite(gfx.generateCanvasTexture());
+    base.sprite.x = base.x * renderConfig.grid_size;
+    base.sprite.y = base.y * renderConfig.grid_size;
+    base.sprite.anchor.x = base.sprite.anchor.y = 0.5;
+    viewport.addChild(base.sprite);
 });
 
 
