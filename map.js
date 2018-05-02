@@ -277,7 +277,7 @@
                     if(this.bases[lane.from].owner === this.bases[lane.to].owner) return;
                     this.spawnCreep(base, lane);
                 });
-                base.spawn_time = config.tiers.base.spawn_rate[base.spawn_rate_tier];
+                base.spawn_time = config.tiers.base.spawn_rate[base.spawn_rate_tier].value;
                 return;
             }
         }
