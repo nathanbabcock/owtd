@@ -505,3 +505,5 @@ All I want to do is just serialize the bits of gamestate that different clients 
 
 5/1:
 trying to resurrect this and finish client side graphics?
+what if i just render JSON for each base on click for status? thats cool right, no ui work
+1hr graphics
