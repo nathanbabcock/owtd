@@ -60,21 +60,25 @@ let renderConfig = {
     creep_radius: 10,
 };
 
+function getBaseColor(base){
+    return map.players[base.owner].color;
+}
+
 function getBaseGraphics(base){
     let gfx = new PIXI.Graphics();
-    gfx.beginFill(map.players[base.owner].color);
-    //gfx.beginFill(base.)
+    gfx.beginFill(getBaseColor(base));
     gfx.drawCircle(0, 0, renderConfig.base_radius);
     return gfx;   
 }
 
 // Bases
-// graphics.beginFill(0xFF3300);
 map.bases.forEach(base => {
     base.sprite = new PIXI.Sprite(getBaseGraphics(base).generateCanvasTexture());
     base.sprite.x = base.x * renderConfig.grid_size;
     base.sprite.y = base.y * renderConfig.grid_size;
     base.sprite.anchor.x = base.sprite.anchor.y = 0.5;
+    base.sprite.interactive = true;
+    base.sprite.on('click', () => console.log("Clicked base ", base));
     viewport.addChild(base.sprite);
 });
 
@@ -87,20 +91,8 @@ map.towers.forEach(tower => {
 });
 
 // Lanes
-graphics.lineStyle(4, 0x000000);
- map.lanes.forEach(lane => {
-    graphics.moveTo(lane.from.x * renderConfig.grid_size, lane.from.y * renderConfig.grid_size);
-    graphics.lineTo(lane.tiles[0].x * renderConfig.grid_size, lane.tiles[0].y * renderConfig.grid_size);
-    for(let i = 0; i < lane.tiles.length - 1; i++){
-        graphics.moveTo(lane.tiles[i].x  * renderConfig.grid_size, lane.tiles[i].y * renderConfig.grid_size);
-        graphics.lineTo(lane.tiles[i+1].x * renderConfig.grid_size, lane.tiles[i+1].y * renderConfig.grid_size);
-    }
-    // graphics.moveTo(lane.tiles[lane.tiles.length - 1].x  * renderConfig.grid_size, lane.tiles[lane.tiles.length - 1].y * renderConfig.grid_size);
-    graphics.lineTo(lane.to.x  * renderConfig.grid_size, lane.to.y * renderConfig.grid_size);
-});
-
-
-// Preload creep graphics
+let laneGfx = new PIXI.Graphics();
+viewport.addChild(laneGfx);
 
 function getCreepOwner(creep){
     return map.bases[creep.base].owner;
@@ -156,7 +148,22 @@ function renderCreeps(){
     });
 }
 
+function renderLanes(){
+    laneGfx.clear();
+    map.lanes.forEach(lane => {
+        let from = map.bases[lane.from],
+            to = map.bases[lane.to];
+        // console.log(from, to);
+        laneGfx.lineStyle(2, (from.owner === to.owner) ? getBaseColor(from) : 0x010101);
+        laneGfx.moveTo(from.x * renderConfig.grid_size, from.y * renderConfig.grid_size);
+        for(let i = 0; i < lane.tiles.length - 1; i++)
+            laneGfx.lineTo(lane.tiles[i+1].x * renderConfig.grid_size, lane.tiles[i+1].y * renderConfig.grid_size);
+        laneGfx.lineTo(to.x * renderConfig.grid_size, to.y * renderConfig.grid_size);
+    });
+}
+
 function updateBases(){
+    // TODO wildly inefficient :)
     map.bases.forEach(base => {
         base.sprite.texture = getBaseGraphics(base).generateCanvasTexture();
     });
@@ -166,5 +173,6 @@ app.ticker.add(function() {
     // console.log("PIXI update");
     renderCreeps();
     updateBases();
+    renderLanes();
     app.renderer.render(app.stage);
 });
